@@ -1,0 +1,14 @@
+node_modules/
+.env
+.env.*
+.DS_Store
+coverage/
+dist/
+build/
+*.log
+*.tmp
+
+# Local data and generated content
+data/raw/
+data/normalized/
+data/archives/

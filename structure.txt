@@ -1,0 +1,377 @@
+SIEM - Detailed Structure and Working Diagram
+
+This document is a detailed companion to README.md.
+It uses the full feature set described in the README and turns it into a clear project structure, component layout, folder map, and working diagrams.
+
+1) Full feature set from README.md
+
+Core Functions
+- Collect security logs from endpoints, servers, applications, and network devices.
+- Accept logs through file upload, HTTP API, Syslog, or agent-based input.
+- Normalize different log formats into one common schema.
+- Store events for later search and investigation.
+- Index events for fast querying.
+- Detect suspicious activity using rules and thresholds.
+- Generate alerts when rule conditions match.
+- Show events, alerts, and trends in a dashboard.
+- Support manual investigation and incident tracking.
+
+Security Features
+- User authentication.
+- Role-based access control.
+- Audit logging for user and admin actions.
+- Encrypted secrets and protected configuration.
+- Raw log preservation for forensic review.
+
+Investigation Features
+- Search by time, source, host, user, IP, severity, and tags.
+- Filter and sort events quickly.
+- Open event details for deeper inspection.
+- Link alerts to related events.
+- Track cases or incidents manually.
+
+Detection Features
+- Rule-based detection.
+- Threshold-based detection.
+- Repeated-event detection.
+- Severity assignment for alerts.
+- Alert suppression and deduplication.
+
+Dashboard Features
+- Recent alerts view.
+- Event volume overview.
+- Top sources, hosts, users, and rules.
+- Basic trend charts.
+
+Data Features
+- Raw event storage.
+- Normalized event storage.
+- Search index support.
+- Tags and metadata support.
+- Time-based event records.
+
+Operational Functions
+- Log ingestion pipeline.
+- Event parsing and normalization.
+- Alert creation and storage.
+- Search and retrieval.
+- Basic reporting and export.
+
+How It Works
+- The application continuously receives logs or events from supported sources.
+- It parses and normalizes each incoming event.
+- It stores raw and normalized data.
+- It indexes the event so it can be searched quickly.
+- It checks the event against detection rules.
+- It creates an alert if a rule matches.
+- It updates dashboards and search results for the user.
+
+In simple terms, the SIEM watches incoming security data, organizes it, stores it, searches it, and raises alerts when something suspicious happens.
+
+2) Recommended file and folder structure
+
+This is a practical, local-first project structure for a scratch SIEM implementation.
+
+./
+├── README.md                         # feature summary and user-facing overview
+├── structure.txt                     # this document
+├── docs/
+│   ├── architecture/
+│   │   ├── data-flow.md              # how logs move through the system
+│   │   ├── rules.md                  # detection rules and examples
+│   │   └── dashboard.md              # dashboard explanations and metrics
+│   ├── examples/
+│   │   ├── sample-logs.md            # example logs to ingest
+│   │   └── sample-alerts.md          # example alerts and cases
+│   └── runbook.md                    # how to operate locally
+├── apps/
+│   ├── api/
+│   │   ├── src/
+│   │   │   ├── index.ts              # starts the API server
+│   │   │   ├── routes/
+│   │   │   │   ├── ingest.ts         # receives logs
+│   │   │   │   ├── events.ts         # search and event retrieval
+│   │   │   │   ├── alerts.ts         # alert listing and actions
+│   │   │   │   └── cases.ts          # case tracking
+│   │   │   ├── services/
+│   │   │   │   ├── parser.ts         # normalize raw logs
+│   │   │   │   ├── storage.ts        # write raw and normalized data
+│   │   │   │   ├── indexer.ts        # index documents for search
+│   │   │   │   └── detector.ts       # apply rules and create alerts
+│   │   │   └── middleware/
+│   │   │       ├── auth.ts           # authentication and roles
+│   │   │       └── audit.ts          # audit logging
+│   │   ├── package.json
+│   │   └── tsconfig.json
+│   ├── worker/
+│   │   ├── src/
+│   │   │   ├── worker.ts             # background processing loop
+│   │   │   ├── normalizer.ts         # event normalization
+│   │   │   ├── rules.ts              # rule evaluation engine
+│   │   │   ├── alerts.ts             # alert creation
+│   │   │   └── exporter.ts           # CSV/JSON export jobs
+│   │   ├── package.json
+│   │   └── tsconfig.json
+│   └── web/
+│       ├── app/
+│       │   ├── page.tsx              # home/dashboard page
+│       │   ├── events/page.tsx       # search and event browsing
+│       │   ├── alerts/page.tsx       # alerts list and triage
+│       │   ├── cases/page.tsx        # case management
+│       │   └── settings/page.tsx     # auth and configuration
+│       ├── components/
+│       │   ├── dashboard/
+│       │   ├── charts/
+│       │   ├── tables/
+│       │   └── forms/
+│       ├── package.json
+│       └── tsconfig.json
+├── infra/
+│   └── docker/
+│       ├── docker-compose.yml         # local development services
+│       └── README.md                  # how to run the local stack
+├── data/
+│   ├── raw/                           # raw payloads stored here
+│   ├── normalized/                    # normalized event snapshots
+│   └── archives/                      # older events and retained logs
+├── scripts/
+│   ├── seed.js                        # sample log generator
+│   ├── import.js                      # import logs from files
+│   └── healthcheck.js                 # quick service checks
+├── prisma/
+│   └── schema.prisma                  # database tables for events and alerts
+└── .gitignore
+
+3) What each folder is responsible for
+
+README.md
+- Human-readable summary of the project.
+- Describes features, how it works, and the goal of the SIEM.
+
+structure.txt
+- Detailed internal design document.
+- Shows the file structure, runtime flow, and component relationships.
+
+apps/api
+- Receives logs and serves event/alert/case endpoints.
+- Handles authentication, validation, and audit logging.
+- Coordinates storage, indexing, and alert access.
+
+apps/worker
+- Runs background jobs.
+- Normalizes logs, evaluates rules, creates alerts, and handles exports.
+
+apps/web
+- User interface for dashboards, search, alerts, and cases.
+- Calls the API to display and manage data.
+
+infra/docker
+- Local runtime setup for a laptop-based deployment.
+- Keeps the project free and easy to run.
+
+data
+- Stores raw logs, normalized snapshots, and archives.
+- Useful for debugging and forensic review.
+
+scripts
+- Helper scripts for sample data, imports, and health checks.
+
+prisma
+- Database schema and migrations.
+- Defines events, alerts, cases, users, and audit records.
+
+4) Detailed system components and their connections
+
+A) Log collection layer
+- Sources: endpoints, servers, applications, network devices.
+- Inputs: files, Syslog, HTTP API, agent input.
+- Output: raw security events.
+
+B) Ingestion layer
+- Accepts the event.
+- Validates basic shape and source.
+- Writes the raw payload to disk.
+- Sends the event to the background queue or worker.
+
+C) Normalization layer
+- Converts different formats into one canonical event structure.
+- Extracts fields such as timestamp, source, host, user, IP, severity, tags, and message.
+- Produces normalized records for search and storage.
+
+D) Storage layer
+- Stores raw logs for forensic review.
+- Stores normalized events for search and reporting.
+- Stores alerts and cases for investigation workflow.
+
+E) Search and indexing layer
+- Pushes normalized data into a search index.
+- Allows search by time, host, user, source, severity, or tags.
+- Supports sorting and filtering.
+
+F) Detection layer
+- Reads normalized events.
+- Runs rule-based and threshold-based checks.
+- Detects repeats, suspicious patterns, and severity triggers.
+- Creates alerts when a rule is matched.
+
+G) Investigation layer
+- Displays event lists and event details.
+- Shows alerts, trends, and dashboard summaries.
+- Lets analysts create or track cases.
+
+H) Security layer
+- Authenticates users.
+- Controls roles and permissions.
+- Audits important actions.
+- Protects secrets and sensitive settings.
+
+5) How data flows inside the application
+
+Step 1: Receive
+- A log arrives from a supported source.
+- The API receives and validates the request.
+
+Step 2: Store raw event
+- The raw payload is saved in data/raw.
+- The system keeps it unchanged for future review.
+
+Step 3: Normalize
+- A worker reads the raw payload.
+- The worker converts it into the canonical event format.
+
+Step 4: Persist
+- The normalized event is saved in the database.
+- A copy or reference is indexed for search.
+
+Step 5: Detect
+- The rule engine checks the event against detection rules.
+- Alerts are created if conditions match.
+
+Step 6: Display
+- The dashboard and search pages fetch events and alerts.
+- Analysts inspect and triage the results.
+
+Step 7: Track and export
+- Analysts can link cases, add notes, and export results.
+
+6) Diagram of how it works
+ASCII diagram:
+
+Log Source
+   |
+   v
+Ingestion API
+   |
+   +--> Raw Storage
+   |
+   +--> Queue / Worker
+             |
+             v
+        Normalizer Worker
+             |
+        +----+----+
+        |         |
+        v         v
+   Event Store   Search Index
+        |
+        v
+   Rule Engine
+        |
+        v
+   Alerts Store
+        |
+        v
+     Web UI / Dashboard
+        |
+        v
+   Cases / Export / Reporting
+
+7) Feature-to-component mapping
+
+- Collect logs: Log Source -> Ingestion API
+- Accept file upload / HTTP / Syslog / agent input: Ingestion API
+- Normalize formats: Worker / Normalizer
+- Store events: Database and raw storage
+- Index events: Search index
+- Detect suspicious activity: Rule engine
+- Generate alerts: Alerts store and alert creation service
+- Show dashboard: Web UI
+- Search and investigation: Search index + API + Web UI
+- Authentication and roles: Auth middleware and identity layer
+- Audit logging: Audit middleware and audit tables
+- Reporting/export: Worker exporter and API export endpoints
+
+8) Minimal data model
+
+Event
+- id
+- timestamp
+- source
+- event_type
+- severity
+- hostname
+- username
+- ip_address
+- message
+- tags
+- raw_path
+
+Alert
+- id
+- event_ids
+- rule_id
+- severity
+- created_at
+- status
+- notes
+
+Case
+- id
+- title
+- description
+- status
+- owner
+- linked_alerts
+- created_at
+- updated_at
+
+User
+- id
+- name
+- email
+- role
+- last_login
+
+AuditRecord
+- id
+- user_id
+- action
+- target
+- timestamp
+- metadata
+
+9) Practical run model
+
+- Keep the first version single-node.
+- Run everything locally on one laptop.
+- Use free and open-source services only.
+- Store raw payloads on disk.
+- Use a worker for background processing.
+- Keep the app simple enough to debug manually.
+
+10) Suggested implementation order
+
+1. Create the local folder structure.
+2. Build the ingestion API.
+3. Add raw storage and normalization.
+4. Add database tables.
+5. Add search indexing.
+6. Add rule-based alerts.
+7. Add dashboard and search UI.
+8. Add auth, audit logging, and cases.
+9. Add export and reporting.
+10. Add tests and seed scripts.
+
+11) Short summary
+
+This SIEM receives logs, stores them, normalizes them, indexes them, detects suspicious behavior, and shows the results in a dashboard so analysts can investigate alerts and cases.

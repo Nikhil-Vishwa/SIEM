@@ -1,0 +1,298 @@
+SIEM Project Build Guide
+
+This file is a step-by-step checklist for building the SIEM project from scratch.
+It is based on the full content of README.md and structure.txt, so it covers the features, file structure, data flow, and implementation order.
+
+Use this as the working plan while building the project.
+
+1) Project goal
+
+- Build a free, local-first SIEM.
+- Run everything on one laptop first.
+- Use simple, open-source tools only.
+- Support logs, normalization, search, alerts, dashboards, cases, and reporting.
+- Keep the first version easy to understand and easy to test.
+
+2) Core feature checklist
+
+Core functions
+- Collect logs from endpoints, servers, applications, and network devices.
+- Accept logs through file upload, HTTP API, Syslog, or agent-based input.
+- Normalize different log formats into one common schema.
+- Store events for later search and investigation.
+- Index events for fast querying.
+- Detect suspicious activity using rules and thresholds.
+- Generate alerts when rule conditions match.
+- Show events, alerts, and trends in a dashboard.
+- Support manual investigation and incident tracking.
+
+Security features
+- Add user authentication.
+- Add role-based access control.
+- Add audit logging for user and admin actions.
+- Protect secrets and configuration.
+- Preserve raw logs for forensic review.
+
+Investigation features
+- Search by time, source, host, user, IP, severity, and tags.
+- Filter and sort events.
+- Open event details.
+- Link alerts to events.
+- Track cases or incidents.
+
+Detection features
+- Build rule-based detection.
+- Build threshold-based detection.
+- Support repeated-event detection.
+- Assign severity to alerts.
+- Support alert suppression and deduplication.
+
+Dashboard features
+- Show recent alerts.
+- Show event volume overview.
+- Show top sources, hosts, users, and rules.
+- Show basic trend charts.
+
+Data features
+- Store raw events.
+- Store normalized events.
+- Add search index support.
+- Add tags and metadata support.
+- Keep time-based records.
+
+Operational functions
+- Build the ingestion pipeline.
+- Build event parsing and normalization.
+- Build alert creation and storage.
+- Build search and retrieval.
+- Build basic reporting and export.
+
+3) Step-by-step build plan
+
+Phase 1 - Set up the project root
+- Create the root repository structure.
+- Keep `README.md` and `structure.txt` in the root.
+- Add `todo.txt` as the working build guide.
+- Add `.gitignore` for logs, build outputs, and secrets.
+- Prepare folders for `apps`, `docs`, `infra`, `data`, `scripts`, and `prisma`.
+
+Phase 2 - Create the documentation structure
+- Add `docs/architecture/data-flow.md` for runtime flow details.
+- Add `docs/architecture/rules.md` for detection logic and examples.
+- Add `docs/architecture/dashboard.md` for dashboard explanations.
+- Add `docs/examples/sample-logs.md` for sample payloads.
+- Add `docs/examples/sample-alerts.md` for sample alerts and cases.
+- Add `docs/runbook.md` for local operation and recovery steps.
+
+Phase 3 - Create the application structure
+- Create `apps/api` for the main API server.
+- Create `apps/worker` for background processing.
+- Create `apps/web` for the analyst UI.
+- Add `package.json` and `tsconfig.json` to each app.
+- Keep the first version simple and local only.
+
+Phase 4 - Build the API server
+- Create `apps/api/src/index.ts` to start the server.
+- Add `apps/api/src/routes/ingest.ts` to receive logs.
+- Add `apps/api/src/routes/events.ts` to search and fetch events.
+- Add `apps/api/src/routes/alerts.ts` to list and manage alerts.
+- Add `apps/api/src/routes/cases.ts` to manage cases.
+- Add `apps/api/src/middleware/auth.ts` for authentication.
+- Add `apps/api/src/middleware/audit.ts` for audit logging.
+- Add `apps/api/src/services/storage.ts` for raw and normalized data writes.
+- Add `apps/api/src/services/indexer.ts` for indexing documents.
+- Add `apps/api/src/services/detector.ts` for rule-trigger checks.
+- Add validation so the API rejects bad or incomplete payloads.
+
+Phase 5 - Build the worker
+- Create `apps/worker/src/worker.ts` as the background loop.
+- Add `apps/worker/src/normalizer.ts` to convert logs into a canonical schema.
+- Add `apps/worker/src/rules.ts` to evaluate rules.
+- Add `apps/worker/src/alerts.ts` to create alerts.
+- Add `apps/worker/src/exporter.ts` for CSV and JSON exports.
+- Make the worker read raw events, normalize them, store them, and trigger alerts.
+
+Phase 6 - Build the web UI
+- Create `apps/web/app/page.tsx` as the dashboard home page.
+- Create `apps/web/app/events/page.tsx` for event search and browsing.
+- Create `apps/web/app/alerts/page.tsx` for alerts and triage.
+- Create `apps/web/app/cases/page.tsx` for case management.
+- Create `apps/web/app/settings/page.tsx` for auth and configuration.
+- Create reusable UI components for dashboards, charts, tables, and forms.
+- Make the UI able to call the API and display live data.
+
+Phase 7 - Create the data layer
+- Add `prisma/schema.prisma` for the database schema.
+- Define tables for `Event`, `Alert`, `Case`, `User`, and `AuditRecord`.
+- Add fields for timestamps, severity, source, host, user, tags, and raw path.
+- Add migrations to create and update tables.
+- Keep raw payloads on disk inside `data/raw`.
+- Store normalized event snapshots in `data/normalized`.
+- Store older or retained data in `data/archives`.
+
+Phase 8 - Build search and indexing
+- Index normalized events into a search engine.
+- Support search by time, source, host, user, severity, and tags.
+- Support filter and sort options.
+- Support event detail lookup.
+- Make search results usable from the web UI.
+
+Phase 9 - Build detection and alerts
+- Start with simple rules.
+- Add threshold checks.
+- Add repeated-event checks.
+- Add severity-based matching.
+- Add alert suppression and deduplication.
+- Store alerts with links to the related events.
+- Show alerts in the dashboard and alerts page.
+
+Phase 10 - Build dashboards and investigation tools
+- Show recent alerts.
+- Show event volume trends.
+- Show top sources, hosts, users, and rules.
+- Show charts and tables for investigations.
+- Let analysts open event details.
+- Let analysts link alerts to cases.
+- Let analysts track cases and update status.
+
+Phase 11 - Build authentication and audit logging
+- Add local authentication.
+- Add role-based access control.
+- Separate admin and analyst permissions.
+- Protect write actions.
+- Log important user and admin actions.
+- Protect secrets and configuration values.
+
+Phase 12 - Build reporting and export
+- Add CSV export for events and alerts.
+- Add JSON export for investigations.
+- Add basic report summaries.
+- Add simple operational exports for local review.
+
+Phase 13 - Add helper scripts
+- Create `scripts/seed.js` to generate sample logs.
+- Create `scripts/import.js` to import logs from files.
+- Create `scripts/healthcheck.js` to validate local services.
+- Use these scripts to test the pipeline end to end.
+
+Phase 14 - Add local runtime setup
+- Create `infra/docker/docker-compose.yml`.
+- Include the local services needed for the scratch build.
+- Keep the first version single-node and laptop-friendly.
+- Use the compose file to run the database, search service, and app services.
+
+Phase 15 - Test the whole system
+- Test ingestion.
+- Test normalization.
+- Test storage.
+- Test indexing.
+- Test detection.
+- Test alerts.
+- Test dashboards.
+- Test authentication.
+- Test reporting.
+- Test export.
+- Test the complete end-to-end flow with sample logs.
+
+4) File-by-file build checklist
+
+Root
+- `README.md`: user-facing overview and feature summary.
+- `structure.txt`: full internal structure and architecture guide.
+- `todo.txt`: build checklist and implementation roadmap.
+- `.gitignore`: exclude generated data, logs, env files, and build output.
+
+Docs
+- `docs/architecture/data-flow.md`: explain how logs move through the system.
+- `docs/architecture/rules.md`: explain detection rules and matching.
+- `docs/architecture/dashboard.md`: explain dashboard metrics and charts.
+- `docs/examples/sample-logs.md`: keep sample event examples.
+- `docs/examples/sample-alerts.md`: keep sample alert examples.
+- `docs/runbook.md`: keep local operations and recovery steps.
+
+API
+- `apps/api/src/index.ts`: server startup and route registration.
+- `apps/api/src/routes/ingest.ts`: ingest logs.
+- `apps/api/src/routes/events.ts`: search and retrieve events.
+- `apps/api/src/routes/alerts.ts`: list and manage alerts.
+- `apps/api/src/routes/cases.ts`: list and manage cases.
+- `apps/api/src/middleware/auth.ts`: access control.
+- `apps/api/src/middleware/audit.ts`: audit trail.
+- `apps/api/src/services/storage.ts`: raw and normalized storage.
+- `apps/api/src/services/indexer.ts`: search indexing.
+- `apps/api/src/services/detector.ts`: detection support.
+
+Worker
+- `apps/worker/src/worker.ts`: loop and job processing.
+- `apps/worker/src/normalizer.ts`: normalize events.
+- `apps/worker/src/rules.ts`: evaluate rules.
+- `apps/worker/src/alerts.ts`: create alerts.
+- `apps/worker/src/exporter.ts`: export reports.
+
+Web
+- `apps/web/app/page.tsx`: dashboard home.
+- `apps/web/app/events/page.tsx`: event search page.
+- `apps/web/app/alerts/page.tsx`: alerts page.
+- `apps/web/app/cases/page.tsx`: cases page.
+- `apps/web/app/settings/page.tsx`: settings page.
+- `apps/web/components/dashboard`: dashboard widgets.
+- `apps/web/components/charts`: chart components.
+- `apps/web/components/tables`: table components.
+- `apps/web/components/forms`: form components.
+
+Infra and data
+- `infra/docker/docker-compose.yml`: local runtime.
+- `infra/docker/README.md`: startup instructions.
+- `data/raw`: raw logs.
+- `data/normalized`: normalized data.
+- `data/archives`: retained or older logs.
+
+Prisma
+- `prisma/schema.prisma`: defines database schema for events, alerts, cases, users, and audit records.
+
+Scripts
+- `scripts/seed.js`: sample log generator.
+- `scripts/import.js`: file import utility.
+- `scripts/healthcheck.js`: quick service checks.
+
+5) Detailed data flow that the code should follow
+
+1. Receive a log.
+2. Validate the payload.
+3. Store the raw log on disk.
+4. Send the event to the worker or queue.
+5. Normalize the event into one schema.
+6. Save the normalized event.
+7. Index the event.
+8. Run detection rules.
+9. Create an alert if the rule matches.
+10. Show the alert in the UI.
+11. Let the analyst investigate the event.
+12. Let the analyst create or update a case.
+13. Allow export of data for reporting.
+
+6) Suggested implementation sequence
+
+1. Create folders and empty files.
+2. Create database schema.
+3. Build ingestion API.
+4. Build worker normalization.
+5. Build search index.
+6. Build alerts.
+7. Build UI dashboard.
+8. Add authentication and audit logging.
+9. Add exports and reporting.
+10. Add tests and sample data.
+11. Run everything locally.
+
+7) Final build summary
+
+The project should behave like this:
+- Logs enter through the ingestion layer.
+- Raw data is preserved.
+- Data is normalized and stored.
+- Events are indexed for search.
+- Rules create alerts.
+- The dashboard shows results.
+- Analysts investigate and manage cases.
+- Reports and exports can be generated.
